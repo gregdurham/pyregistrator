@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import sys
+from optparse import OptionParser
+import shlex, subprocess
+from pyregistrator import Config
+from pyregistrator import yaml_to_dict
+from pyregistrator import EtcdBackend
+
+parser = OptionParser()
+parser.add_option("--config-file", dest="config_file", default="/etc/pyconfigurator/default.yml", help="Path to the config file")
+parser.add_option("--host", dest="host", help="Hostname/ip to update etcd with")
+parser.add_option("--ttl", dest="ttl", help="TTL for the key to write")
+parser.add_option("--etcd-ip", dest="etcd_ip", default="127.0.0.1", help="IP address of etcd server default is 127.0.0.1")
+parser.add_option("--etcd-port", type="int", dest="etcd_port", default=4001, help="Port of etcd server default is 4001")
+
+(options, args) = parser.parse_args()
+try:
+    config = Config(yaml_to_dict(options.config_file))
+    config.validate()
+    conf_vars = {'etcd': EtcdBackend(options.etcd_ip, options.etcd_port, options.host, options.ttl)}
+    commands_section = config.get_commands()
+    success = 0
+    for command in commands_section:
+        args = shlex.split(command.get('cmd')) 
+        expectedRet = 0
+        if 'expected' in command:
+            expectedRet = command.get('expected') 
+        process = subprocess.Popen(args)
+        stdoutdata, stderrdata = process.communicate()
+        if process.returncode == expectedRet:
+            success = success + 1
+
+    paths_section = config.get_paths()
+    if len(commands_section) == success:
+        for backend in paths_section.keys():
+            conf_vars[backend].put_values(paths_section[backend])
+
+except:
+    print sys.exc_info()[1]
+    sys.exit(1)
+

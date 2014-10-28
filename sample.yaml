@@ -1,0 +1,9 @@
+---
+paths:
+    etcd:
+        "/servers/temp/path":
+            port: 69
+            config: option  
+commands:
+    - cmd: "ls"
+      expected: 0

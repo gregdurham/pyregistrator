@@ -1,0 +1,24 @@
+---
+type: map
+mapping:
+    "paths":
+        type: map
+        mapping:
+            "etcd":
+                type: map
+                mapping:
+                    regex;(.*):
+                        type: map
+                        mapping:
+                            regex;(.*):
+                                type: text
+    "commands":
+        type: seq
+        sequence:
+            - type: map
+              mapping:
+                  cmd:
+                      type: str
+                      required: True
+                  regex;(.*):
+                      type: text
