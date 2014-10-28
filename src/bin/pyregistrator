@@ -10,10 +10,11 @@ from pyregistrator import EtcdBackend
 
 parser = OptionParser()
 parser.add_option("--config-file", dest="config_file", default="/etc/pyconfigurator/default.yml", help="Path to the config file")
-parser.add_option("--host", dest="host", help="Hostname/ip to update etcd with")
-parser.add_option("--ttl", dest="ttl", help="TTL for the key to write")
+parser.add_option("--host", dest="host", default="localhost", help="Hostname/ip to update etcd with")
+parser.add_option("--ttl", dest="ttl", default=60, help="TTL for the key to write")
 parser.add_option("--etcd-ip", dest="etcd_ip", default="127.0.0.1", help="IP address of etcd server default is 127.0.0.1")
 parser.add_option("--etcd-port", type="int", dest="etcd_port", default=4001, help="Port of etcd server default is 4001")
+parser.add_option("--noop", action="store_true", dest="noop", default=False, help="Run without modifying anything")
 
 (options, args) = parser.parse_args()
 try:
@@ -35,7 +36,7 @@ try:
     paths_section = config.get_paths()
     if len(commands_section) == success:
         for backend in paths_section.keys():
-            conf_vars[backend].put_values(paths_section[backend])
+            conf_vars[backend].put_values(paths_section[backend], options.noop)
 
 except:
     print sys.exc_info()[1]
