@@ -9,7 +9,7 @@ from pyregistrator import yaml_to_dict
 from pyregistrator import EtcdBackend
 
 parser = OptionParser()
-parser.add_option("--config-file", dest="config_file", default="/etc/pyconfigurator/default.yml", help="Path to the config file")
+parser.add_option("--config-file", dest="config_file", default="/etc/pyregistrator/default.yml", help="Path to the config file")
 parser.add_option("--host", dest="host", default="localhost", help="Hostname/ip to update etcd with")
 parser.add_option("--ttl", dest="ttl", default=60, help="TTL for the key to write")
 parser.add_option("--etcd-ip", dest="etcd_ip", default="127.0.0.1", help="IP address of etcd server default is 127.0.0.1")
@@ -28,7 +28,7 @@ try:
         expectedRet = 0
         if 'expected' in command:
             expectedRet = command.get('expected') 
-        process = subprocess.Popen(args)
+        process = subprocess.Popen(args, env=os.environ.copy())
         stdoutdata, stderrdata = process.communicate()
         if process.returncode == expectedRet:
             success = success + 1
